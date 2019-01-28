@@ -8,7 +8,8 @@ using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
 
 public class drive : MonoBehaviour {
-
+    //Server starten!
+    //sumo --remote-port 4001 --net map0.net.xml
     public GameObject car;
 
     private CarController carController;
@@ -40,11 +41,13 @@ public class drive : MonoBehaviour {
             {
                 float oldAngle = float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString());
                 client.Control.SimStep();
-                float acc = float.Parse((client.Vehicle.GetAccel("veh0").Content).ToString()) > 0 ? 1 : 0;
-                //carController.Move(float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString()), acc, acc, 0);
+                float acc = float.Parse((client.Vehicle.GetAccel("veh0").Content).ToString());
+                carController.Move(float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString()), acc, acc, 0);
                 float newAngle = float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString());
+                float maxAcc = float.Parse(client.Vehicle.GetAccel("veh0").Content.ToString());
                 Debug.Log(client.Vehicle.GetAngle("veh0").Content.ToString());
-                carController.Move(getAngle(oldAngle, newAngle), acc, acc, 0);
+                carController.Move(getAngle(oldAngle, newAngle), acc/maxAcc, acc/maxAcc, 0);
+                //if(client.Vehicle.GetSpeed) 
             }
             catch (Exception e)
             {
