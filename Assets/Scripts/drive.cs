@@ -14,6 +14,7 @@ public class drive : MonoBehaviour {
     private int id;
     float oldAngle;
     int step;
+    float time;
 
     private Vector2 oldSimPosition;
     private Vector2 newSimPosition;
@@ -43,33 +44,35 @@ public class drive : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update() {
+        time += Time.deltaTime*2;
        try
        {
-            Vector2 newUnityPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
+            /*Vector2 newUnityPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
             Vector2 differenceUnity = newUnityPosition - oldUnityPosition;
             double lengthUnity = Math.Sqrt(differenceUnity.x * differenceUnity.x + differenceUnity.y * differenceUnity.y);
             Vector2 differenceSim = newSimPosition - oldSimPosition;
             double lengthSim = Math.Sqrt(differenceSim.x * differenceSim.x + differenceSim.y * differenceSim.y);
             //Am Anfang hat die Geschwindigkeit einen negative Defaut-Wert. Ebenso die Beschleunigung
-            if (lengthUnity >= lengthSim || client.Vehicle.GetSpeed("veh0").Content < -1073741823 || step < 3 || car.GetComponent<Transform>().position.x - (float)client.Vehicle.GetPosition("veh0").Content.X < 0.1 && car.GetComponent<Transform>().position.z - (float)client.Vehicle.GetPosition("veh0").Content.Y < 0.1)
-            {                
+            //if (lengthUnity >= lengthSim || step < 3 || Math.Abs(car.GetComponent<Transform>().position.x - (float)client.Vehicle.GetPosition("veh0").Content.X) < 0.1 && Math.Abs(car.GetComponent<Transform>().position.z - (float)client.Vehicle.GetPosition("veh0").Content.Y) < 0.1)
+            //{                
                 car.GetComponent<Transform>().position = new Vector3(float.Parse(client.Vehicle.GetPosition("veh0").Content.X.ToString()), car.GetComponent<Transform>().position.y, float.Parse(client.Vehicle.GetPosition("veh0").Content.Y.ToString()));
                 oldAngle = float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString());
                 oldSimPosition = new Vector2((float)client.Vehicle.GetPosition("veh0").Content.X, (float)client.Vehicle.GetPosition("veh0").Content.Y);
-                client.Control.SimStep();
+                client.Control.SimStep(time);                
                 step++;
                 newSimPosition = new Vector2((float)client.Vehicle.GetPosition("veh0").Content.X, (float)client.Vehicle.GetPosition("veh0").Content.Y);
                 oldUnityPosition = GameObject.FindGameObjectWithTag("Player").transform.position;                            
-            }
-            float acc = float.Parse((client.Vehicle.GetAcceleration("veh0").Content).ToString()) > 0 ? float.Parse((client.Vehicle.GetAcceleration("veh0").Content).ToString()) : 0.35F;
+            //}
+            float acc = float.Parse((client.Vehicle.GetAcceleration("veh0").Content).ToString());
             float newAngle = float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString());
-            float maxAcc = float.Parse(client.Vehicle.GetAccel("veh0").Content.ToString());
+            float maxAcc = float.Parse(client.Vehicle.GetAccel("veh0").Content.ToString());*/
 
-            
-            
-            carController.Move(0, acc / maxAcc, acc / maxAcc, 0);
+
+
+            //carController.Move(0, (acc + maxAcc) / (maxAcc * 2), (acc + maxAcc) / (maxAcc * 2), 0);
+            client.Control.SimStep(time);       
             car.GetComponent<Transform>().eulerAngles = new Vector3(car.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString()), car.GetComponent<Transform>().eulerAngles.z);
-            
+            car.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh0").Content.X), car.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh0").Content.Y));
 
         }
         catch (Exception e)
