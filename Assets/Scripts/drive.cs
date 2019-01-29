@@ -8,6 +8,8 @@ public class drive : MonoBehaviour {
     //Server starten!
     //sumo --remote-port 4001 --net map0.net.xml
     public GameObject car;
+    public GameObject car2;
+    public GameObject car3;
 
     private CarController carController;
     private TraCIClient client = new TraCIClient();
@@ -15,6 +17,7 @@ public class drive : MonoBehaviour {
     float oldAngle;
     int step;
     float time;
+    List<String> lines;
 
     private Vector2 oldSimPosition;
     private Vector2 newSimPosition;
@@ -25,6 +28,7 @@ public class drive : MonoBehaviour {
     void Start () {
         id = 0;
         step = 0;
+        lines = new List<string>();
         client.Connect("localhost", 4001);
         addVehicle();
         carController = car.GetComponent<CarController>();
@@ -37,14 +41,28 @@ public class drive : MonoBehaviour {
 
     public void addVehicle()
     {
-        TraCIResponse<object> routeResponse = client.Route.Add("Route1", new List<string>(new String[] { "-gneE10", "-gneE9", "-gneE8", "-gneE12", "-gneE11", "-gneE10" }));
+        client.Route.Add("Route1", new List<string>(new String[] { "-gneE10", "-gneE9", "-gneE8", "-gneE12", "-gneE11"}));
+        client.Route.Add("Route2", new List<string>(new String[] { "-gneE16", "-gneE14", "gneE8"}));
+        client.Route.Add("Route3", new List<string>(new String[] { "-gneE15", "gneE17"}));
         client.Vehicle.Add("veh" + id, "DEFAULT_VEHTYPE", "Route1", 10, 0, 0, Byte.Parse("0"));
+        id++;
+        client.Vehicle.Add("veh" + id, "DEFAULT_VEHTYPE", "Route2", 10, 0, 0, Byte.Parse("0"));
+        id++;
+        client.Vehicle.Add("veh" + id, "DEFAULT_VEHTYPE", "Route3", 10, 0, 0, Byte.Parse("0"));
         id++;
     }
 	
 	// Update is called once per frame
 	void Update() {
-        time += Time.deltaTime*2;
+        time += Time.deltaTime;
+        //String entry1 = "Auto 2; Winkel: " + client.Vehicle.GetAngle("veh1").Content.ToString();
+        //String entry2 = "Auto 3; Winkel: " + client.Vehicle.GetAngle("veh2").Content.ToString();
+        //lines.Add(entry1);
+        //lines.Add(entry2);
+        //if (client.Vehicle.GetAccel("veh1").Result == ResultCode.Failed && client.Vehicle.GetAccel("veh2").Result == ResultCode.Failed)
+        //{
+        //    System.IO.File.WriteAllLines(@"C:\Users\Pascal Pries\Desktop\Teststrecke.txt", lines);
+        //}
        try
        {
             /*Vector2 newUnityPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
@@ -70,9 +88,34 @@ public class drive : MonoBehaviour {
 
 
             //carController.Move(0, (acc + maxAcc) / (maxAcc * 2), (acc + maxAcc) / (maxAcc * 2), 0);
-            client.Control.SimStep(time);       
-            car.GetComponent<Transform>().eulerAngles = new Vector3(car.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString()), car.GetComponent<Transform>().eulerAngles.z);
-            car.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh0").Content.X), car.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh0").Content.Y));
+            client.Control.SimStep(time);
+
+            if (client.Vehicle.GetAccel("veh0").Result == ResultCode.Success)
+            {
+                car.GetComponent<Transform>().eulerAngles = new Vector3(car.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh0").Content.ToString()), car.GetComponent<Transform>().eulerAngles.z);
+                car.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh0").Content.X), car.GetComponent<Transform>().position.y < 0 ? 0.07F : car.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh0").Content.Y));
+            } else
+            {
+                client.Vehicle.Add("veh0", "DEFAULT_VEHTYPE", "Route1", (int)time, 0, 0, Byte.Parse("0"));
+            }
+
+            if (client.Vehicle.GetAccel("veh1").Result == ResultCode.Success)
+            {
+                car2.GetComponent<Transform>().eulerAngles = new Vector3(car2.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh1").Content.ToString()), car2.GetComponent<Transform>().eulerAngles.z);
+                car2.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh1").Content.X), car2.GetComponent<Transform>().position.y < 0 ? 0.07F : car2.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh1").Content.Y));
+            } else
+            {
+                client.Vehicle.Add("veh1", "DEFAULT_VEHTYPE", "Route2", (int)time, 0, 0, Byte.Parse("0"));
+            }
+
+            if (client.Vehicle.GetAccel("veh2").Result == ResultCode.Success)
+            {
+                car3.GetComponent<Transform>().eulerAngles = new Vector3(car3.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh2").Content.ToString()), car3.GetComponent<Transform>().eulerAngles.z);
+                car3.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh2").Content.X), car3.GetComponent<Transform>().position.y < 0 ? 0.07F : car3.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh2").Content.Y));
+            } else
+            {
+                client.Vehicle.Add("veh2", "DEFAULT_VEHTYPE", "Route3", (int)time, 0, 0, Byte.Parse("0"));
+            }
 
         }
         catch (Exception e)
