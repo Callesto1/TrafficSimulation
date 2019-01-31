@@ -37,7 +37,6 @@ public class drive : MonoBehaviour {
         client.Connect("localhost", 4001);
         addStartingVehicles();
         carController = car0.GetComponent<CarController>();
-
         mainCamera.enabled = false;
     }
 
@@ -49,8 +48,6 @@ public class drive : MonoBehaviour {
         routeid++;
         client.Route.Add("Route" + routeid, new List<string>(new String[] { "-gneE15", "gneE17"}));
         routeid++;
-
-        client.Route.Add("PedestrianRoute", new List<string>(new String[] { "-gneE12", "-gneE8" }));
         
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route0", 0, 0, 0, Byte.Parse("0"));
         carid++;
@@ -59,8 +56,8 @@ public class drive : MonoBehaviour {
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
         carid++;
 
-        client.Person.Add("ped0", "DEFAULT_PEDTYPE", "-gneE12", 0.0, 0.0);
-        client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { ":gneJ11_w0", ":gneJ11_c1" }), 0.0, 3, 1.0, "");     
+        client.Person.Add("ped0", "DEFAULT_PEDTYPE", "gneE12", 0.0, 0.0);
+        client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { "gneE12", ":gneJ11_w1", ":gneJ11_c1", ":gneJ11_w2", ":gneJ11_c2", ":gneJ11_w0", "gneE14" }), 0.0, -1, 5, "");     
         
     }
 
@@ -110,8 +107,8 @@ public class drive : MonoBehaviour {
         }
         else
         {
-            client.Person.Add("ped0", "DEFAULT_PEDTYPE", "-gneE12", 0, 0);
-            client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { ":gneJ11_w0", ":gneJ11_c1" }), 0, -1, -1, "");
+            client.Person.Add("ped0", "DEFAULT_PEDTYPE", "gneE12", 0.0, 0.0);
+            client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { "gneE12", ":gneJ11_w1", ":gneJ11_c1", ":gneJ11_w2", ":gneJ11_c2", ":gneJ11_w0", "gneE14" }), 0.0, -1, 5, "");
         }
 
         //sendPosition();
