@@ -353,6 +353,8 @@ namespace CodingConnected.TraCI.NET.Commands
             tmp.Value.Add(new TraCIInteger() { Value = 2 });
             tmp.Value.Add(new TraCIStringList() { Value = edges });
             tmp.Value.Add(new TraCIDouble() { Value = arrivalPosition });
+            tmp.Value.Add(new TraCIInteger() { Value = duration });
+            tmp.Value.Add(new TraCIDouble() { Value = speed });
             tmp.Value.Add(new TraCIString() { Value = stopId });
             return TraCICommandHelper.ExecuteSetCommand<object, CompoundObject>(
                 Client,

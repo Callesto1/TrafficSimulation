@@ -7,10 +7,15 @@ using UnityStandardAssets.Vehicles.Car;
 public class drive : MonoBehaviour {
     //Server starten!
     //sumo --remote-port 4001 --net map.net.xml
+    public GameObject playerCar;
     public GameObject car0;
     public GameObject car1;
     public GameObject car2;
     public GameObject car3;
+    public GameObject ped0;
+
+    public Camera mainCamera;
+    public Camera playerCamera;
 
     //private GameObject[] cars;
     private CarController carController;
@@ -32,6 +37,8 @@ public class drive : MonoBehaviour {
         client.Connect("localhost", 4001);
         addStartingVehicles();
         carController = car0.GetComponent<CarController>();
+
+        mainCamera.enabled = false;
     }
 
     public void addStartingVehicles()
@@ -42,12 +49,19 @@ public class drive : MonoBehaviour {
         routeid++;
         client.Route.Add("Route" + routeid, new List<string>(new String[] { "-gneE15", "gneE17"}));
         routeid++;
+
+        client.Route.Add("PedestrianRoute", new List<string>(new String[] { "-gneE12", "-gneE8" }));
+        
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route0", 0, 0, 0, Byte.Parse("0"));
         carid++;
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route1", 0, 0, 0, Byte.Parse("0"));
         carid++;
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
-        carid++;        
+        carid++;
+
+        client.Person.Add("ped0", "DEFAULT_PEDTYPE", "-gneE12", 0.0, 0.0);
+        client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { ":gneJ11_w0", ":gneJ11_c1" }), 0.0, 3, 1.0, "");     
+        
     }
 
     private void moveVehicles(String id, GameObject carObject)
@@ -75,9 +89,35 @@ public class drive : MonoBehaviour {
         //{
         //    System.IO.File.WriteAllLines(@"C:\Users\Pascal Pries\Desktop\Teststrecke.txt", lines);
         //}
-       try
-       {
-          
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            if(mainCamera.enabled == true)
+            {
+                mainCamera.enabled = false;
+                playerCamera.enabled = true;
+            }
+            else
+            {
+                mainCamera.enabled = true;
+                playerCamera.enabled = false;
+            }
+        }
+
+        if (client.Person.GetSpeed("ped0").Result == ResultCode.Success)
+        {
+            ped0.GetComponent<Transform>().eulerAngles = new Vector3(ped0.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Person.GetAngle("ped0").Content.ToString()), ped0.GetComponent<Transform>().eulerAngles.z);
+            ped0.GetComponent<Transform>().position = new Vector3((float)(client.Person.GetPosition("ped0").Content.X), ped0.GetComponent<Transform>().position.y < 0 ? 0.07F : ped0.GetComponent<Transform>().position.y, (float)(client.Person.GetPosition("ped0").Content.Y));
+        }
+        else
+        {
+            client.Person.Add("ped0", "DEFAULT_PEDTYPE", "-gneE12", 0, 0);
+            client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { ":gneJ11_w0", ":gneJ11_c1" }), 0, -1, -1, "");
+        }
+
+        //sendPosition();
+
+        try
+        {          
             client.Control.SimStep(time);
             step++;
 
@@ -89,25 +129,8 @@ public class drive : MonoBehaviour {
 
             moveVehicles("0", car0);
             moveVehicles("1", car1);
-            moveVehicles("2", car2);
+            moveVehicles("2", car2);            
 
-            if (client.Vehicle.GetAccel("veh1").Result == ResultCode.Success)
-            {
-                car1.GetComponent<Transform>().eulerAngles = new Vector3(car1.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh1").Content.ToString()), car1.GetComponent<Transform>().eulerAngles.z);
-                car1.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh1").Content.X), car1.GetComponent<Transform>().position.y < 0 ? 0.07F : car1.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh1").Content.Y));
-            } else
-            {
-                client.Vehicle.Add("veh1", "DEFAULT_VEHTYPE", "Route1", 0, 0, 0, Byte.Parse("0"));
-            }
-
-            if (client.Vehicle.GetAccel("veh2").Result == ResultCode.Success)
-            {
-                car2.GetComponent<Transform>().eulerAngles = new Vector3(car2.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle("veh2").Content.ToString()), car2.GetComponent<Transform>().eulerAngles.z);
-                car2.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition("veh2").Content.X), car2.GetComponent<Transform>().position.y < 0 ? 0.07F : car2.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition("veh2").Content.Y));
-            } else
-            {
-                client.Vehicle.Add("veh2", "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
-            }
             if (step >= 5)
             {
                 moveVehicles("3", car3);
@@ -125,5 +148,11 @@ public class drive : MonoBehaviour {
         return "Route" + (rnd.Next() % client.Route.GetIdList().Content.Count);
     }
 
+    private void sendPosition()
+    {
+        String id = "veh" + carid;
+        //client.Vehicle.Subscribe(id, 0, 10000000, );
+        carid++;
+    }
 
 }
