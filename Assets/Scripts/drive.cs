@@ -7,6 +7,7 @@ using UnityStandardAssets.Vehicles.Car;
 public class drive : MonoBehaviour {
     //Server starten!
     //sumo --remote-port 4001 --net map.net.xml
+    //https://github.com/argos-research/sumo
     public GameObject playerCar;
     public GameObject car0;
     public GameObject car1;
@@ -56,6 +57,10 @@ public class drive : MonoBehaviour {
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
         carid++;
 
+        client.Vehicle.Add("userCar", "DEFAULT_VEHTYPE", "", 0, 0, 0, Byte.Parse("0"));
+        client.Vehicle.SetLength("userCar", 3.0);
+        client.Vehicle.SetWidth("userCar", 1.5);
+
         client.Person.Add("ped0", "DEFAULT_PEDTYPE", "gneE12", 0.0, 0.0);
         client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { "gneE12", ":gneJ11_w1", ":gneJ11_c1", ":gneJ11_w2", ":gneJ11_c2", ":gneJ11_w0", "gneE14" }), 0.0, -1, 5, "");     
         
@@ -78,6 +83,7 @@ public class drive : MonoBehaviour {
 	// Update is called once per frame
 	void Update() {
         time += Time.deltaTime;
+        sendPosition();
         //String entry1 = "Auto 2; Winkel: " + client.Vehicle.GetAngle("veh1").Content.ToString();
         //String entry2 = "Auto 3; Winkel: " + client.Vehicle.GetAngle("veh2").Content.ToString();
         //lines.Add(entry1);
@@ -111,7 +117,6 @@ public class drive : MonoBehaviour {
             client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { "gneE12", ":gneJ11_w1", ":gneJ11_c1", ":gneJ11_w2", ":gneJ11_c2", ":gneJ11_w0", "gneE14" }), 0.0, -1, 5, "");
         }
 
-        //sendPosition();
 
         try
         {          
@@ -147,9 +152,19 @@ public class drive : MonoBehaviour {
 
     private void sendPosition()
     {
-        String id = "veh" + carid;
-        //client.Vehicle.Subscribe(id, 0, 10000000, );
-        carid++;
+        if (client.Vehicle.GetSpeed("userCar").Result == ResultCode.Success)
+        {
+            double x = playerCar.GetComponent<Transform>().position.x;
+            double y = playerCar.GetComponent<Transform>().position.z;
+            client.Vehicle.MoveToXY("userCar", 0, "", 0, x, y, 0, 2);
+            Debug.Log("x: " + x + "; y: " + y);
+        }
+        else
+        {
+            client.Vehicle.Add("userCar", "DEFAULT_VEHTYPE", "", 0, 0, 0, Byte.Parse("0"));
+            client.Vehicle.SetLength("userCar", 3.0);
+            client.Vehicle.SetWidth("userCar", 1.5);
+        }
     }
 
 }

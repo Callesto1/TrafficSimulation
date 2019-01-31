@@ -1338,6 +1338,7 @@ namespace CodingConnected.TraCI.NET.Commands
             tmp.Value.Add(new TraCIString() { Value = edgeId });
             tmp.Value.Add(new TraCIInteger() { Value = laneIndex });
             tmp.Value.Add(new TraCIDouble() { Value = xPosition });
+            tmp.Value.Add(new TraCIDouble() { Value = yPosition });
             tmp.Value.Add(new TraCIDouble() { Value = angle });
             if (keepRoute == 0 || keepRoute == 1 || keepRoute == 2)
             {
