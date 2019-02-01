@@ -14,6 +14,7 @@ public class drive : MonoBehaviour {
     public GameObject car2;
     public GameObject car3;
     public GameObject ped0;
+    public GameObject trafficLight;
 
     public Camera mainCamera;
     public Camera playerCamera;
@@ -84,6 +85,7 @@ public class drive : MonoBehaviour {
 	void Update() {
         time += Time.deltaTime;
         sendPosition();
+        setTrafficLights();
         //String entry1 = "Auto 2; Winkel: " + client.Vehicle.GetAngle("veh1").Content.ToString();
         //String entry2 = "Auto 3; Winkel: " + client.Vehicle.GetAngle("veh2").Content.ToString();
         //lines.Add(entry1);
@@ -156,8 +158,7 @@ public class drive : MonoBehaviour {
         {
             double x = playerCar.GetComponent<Transform>().position.x;
             double y = playerCar.GetComponent<Transform>().position.z;
-            client.Vehicle.MoveToXY("userCar", 0, "", 0, x, y, 0, 2);
-            Debug.Log("x: " + x + "; y: " + y);
+            client.Vehicle.MoveToXY("userCar", 0, "", 0, x, y, 0, 2);            
         }
         else
         {
@@ -165,6 +166,38 @@ public class drive : MonoBehaviour {
             client.Vehicle.SetLength("userCar", 3.0);
             client.Vehicle.SetWidth("userCar", 1.5);
         }
+    }
+
+    /**     
+     * Aktuell nur die Kreuzung "gneJ11" -> T Kreuzung mit Zebrastreifen.
+     * state="gGGgrrrrG"/>
+     * Jeder Buchstabe entspricht einer Line auf der Kreuzung. 
+     * r = rot
+     * y = gelb
+     * g = grün aber keine Vorfahrt (vermutlich)
+     * G = grün und Vorfahrt (vermutlich)
+     * Laut Doku fangen die Indices oben an, passt allerdings hier irgendwie nicht.
+     * Bei uns fängt es rechts an und zählt im Uhrzeigersinn durch (bis jetzt).
+     */
+    private void setTrafficLights()
+    {        
+        String state = client.TrafficLight.GetState("gneJ11").Content.ToString();
+        List<String> controlledLanes = client.TrafficLight.GetControlledLanes("gneJ11").Content;
+        String lane = "";
+        Debug.Log(state.Length);
+
+        for (int i = 0; i <(int)(state.Length); i++)
+        {            
+            if(!lane.Equals(controlledLanes[i]))
+            {                
+                lane = controlledLanes[i]; //zum auslesen wie viele unterschiedliche lanes es gibt, da Lanes mehrere Lines haben können, was ja aber für die Ampelfarbe egal ist
+                if(state[0].ToString().ToLower().Equals("g")) trafficLight.GetComponent<Renderer>().material.color = new Color(0, 1, 0);
+                if(state[0].ToString().ToLower().Equals("y")) trafficLight.GetComponent<Renderer>().material.color = new Color(1, 1, 0);
+                if(state[0].ToString().ToLower().Equals("r")) trafficLight.GetComponent<Renderer>().material.color = new Color(1, 0, 0);
+            }
+        }
+        
+        //if(state == "0") trafficLight.GetComponent<Renderer>().material.color = new Color(0, 1, 0);       
     }
 
 }
