@@ -24,6 +24,7 @@ public class drive : MonoBehaviour {
     private TraCIClient client = new TraCIClient();
     private int carid;
     private int routeid;
+    private GameObject[] trafficLights;
 
     int step;
     float time;
@@ -40,6 +41,8 @@ public class drive : MonoBehaviour {
         addStartingVehicles();
         carController = car0.GetComponent<CarController>();
         mainCamera.enabled = false;
+
+        trafficLights = GameObject.FindGameObjectsWithTag("TrafficLight");
     }
 
     public void addStartingVehicles()
@@ -180,21 +183,41 @@ public class drive : MonoBehaviour {
      * Bei uns fängt es rechts an und zählt im Uhrzeigersinn durch (bis jetzt).
      */
     private void setTrafficLights()
-    {        
+    {
+        int count = 0;
+        int lines = 1;
+
+        Color red = new Color(1, 0, 0);
+        Color yellow = new Color(1, 1, 0);
+        Color green = new Color(0, 1, 0);
+
         String state = client.TrafficLight.GetState("gneJ11").Content.ToString();
         List<String> controlledLanes = client.TrafficLight.GetControlledLanes("gneJ11").Content;
-        String lane = "";
-        Debug.Log(state.Length);
+
+        String lane = "";        
 
         for (int i = 0; i <(int)(state.Length); i++)
-        {            
-            if(!lane.Equals(controlledLanes[i]))
-            {                
-                lane = controlledLanes[i]; //zum auslesen wie viele unterschiedliche lanes es gibt, da Lanes mehrere Lines haben können, was ja aber für die Ampelfarbe egal ist
-                if(state[0].ToString().ToLower().Equals("g")) trafficLight.GetComponent<Renderer>().material.color = new Color(0, 1, 0);
-                if(state[0].ToString().ToLower().Equals("y")) trafficLight.GetComponent<Renderer>().material.color = new Color(1, 1, 0);
-                if(state[0].ToString().ToLower().Equals("r")) trafficLight.GetComponent<Renderer>().material.color = new Color(1, 0, 0);
+        {
+            if (lane.Equals(controlledLanes[i]) && controlledLanes[i].IndexOf("w") == -1)
+            {
+                lines++;
             }
+            else if(controlledLanes[i].IndexOf("w") == -1)
+            {
+                if(state[count * lines].ToString().ToLower().Equals("g")) trafficLights[count].GetComponent<Renderer>().material.color = green;
+                if(state[count * lines].ToString().ToLower().Equals("y")) trafficLights[count].GetComponent<Renderer>().material.color = yellow;
+                if(state[count * lines].ToString().ToLower().Equals("r")) trafficLights[count].GetComponent<Renderer>().material.color = red;
+
+
+                Debug.Log("Lines: " + lines);
+                Debug.Log("Count: " + count);
+                Debug.Log("Gesamt: " + count * lines);
+
+                count++;
+                lines = 1;
+            }
+
+            lane = controlledLanes[i]; //zum auslesen wie viele unterschiedliche lanes es gibt, da Lanes mehrere Lines haben können, was ja aber für die Ampelfarbe egal ist
         }
         
         //if(state == "0") trafficLight.GetComponent<Renderer>().material.color = new Color(0, 1, 0);       
