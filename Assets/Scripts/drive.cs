@@ -1,4 +1,5 @@
-﻿using CodingConnected.TraCI.NET;
+﻿using Assets.Scripts;
+using CodingConnected.TraCI.NET;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,6 +34,7 @@ public class drive : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        XmlMapReader.Initialize();
         carid = 0;
         routeid = 0;
         step = 0;
@@ -47,11 +49,11 @@ public class drive : MonoBehaviour {
 
     public void addStartingVehicles()
     {
-        client.Route.Add("Route" + routeid, new List<string>(new String[] { "-gneE10", "-gneE9", "-gneE8", "gneE14", "gneE15"}));
+        client.Route.Add("Route" + routeid, XmlMapReader.GetRandomRoute(XmlMapReader.AllNodes));
         routeid++;
-        client.Route.Add("Route" + routeid, new List<string>(new String[] { "-gneE16", "-gneE14", "gneE8", "gneE9", "gneE10", "gneE11", "gneE12", "gneE14", "gneE16" }));
+        client.Route.Add("Route" + routeid, XmlMapReader.GetRandomRoute(XmlMapReader.AllNodes));
         routeid++;
-        client.Route.Add("Route" + routeid, new List<string>(new String[] { "-gneE15", "gneE17"}));
+        client.Route.Add("Route" + routeid, XmlMapReader.GetRandomRoute(XmlMapReader.AllNodes));
         routeid++;
         
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route0", 0, 0, 0, Byte.Parse("0"));
@@ -151,8 +153,9 @@ public class drive : MonoBehaviour {
 
     private string GetRandomRoute()
     {
-        System.Random rnd = new System.Random();
-        return "Route" + (rnd.Next() % client.Route.GetIdList().Content.Count);
+        client.Route.Add("Route" + routeid, XmlMapReader.GetRandomRoute(XmlMapReader.AllNodes));
+        routeid++;
+        return "Route" + (routeid - 1);
     }
 
     private void sendPosition()
