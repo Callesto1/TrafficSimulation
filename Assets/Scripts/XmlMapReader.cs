@@ -59,8 +59,6 @@ namespace Assets.Scripts
                 {
                     String von = parts[5].Split('"')[1];
                     String nach = parts[6].Split('"')[1];
-                    Debug.Log("von: " + von);
-                    Debug.Log("nach: " + nach);
                     if (!von.Contains("_") && !nach.Contains("_"))
                     {
                         AllNodes.Where(n => n.GetName().Equals(von)).First().GetNextNodes().Add(nach);
@@ -76,8 +74,22 @@ namespace Assets.Scripts
 
             System.Random dice = new System.Random();
             //Startpunkt
-            result.Add(possibleNodes.ElementAt(dice.Next() % possibleNodes.Count).GetName());
-            //Insgesamt bis zu 10 Stationen pro Route
+            MapNode node = possibleNodes.Where(n => n.GetNextNodes().Count == 0 && n.GetName().Contains("E")).ElementAt(dice.Next() % possibleNodes.Where(n => n.GetNextNodes().Count == 0 && n.GetName().Contains("E")).Count());
+            String startpunkt = null;
+            while (startpunkt == null)
+            {
+                if (node.GetName().Contains("-") && possibleNodes.Where(n => n.GetName().Equals(node.GetName().Substring(1, node.GetName().Length - 1))).Count() == 1)
+                {
+                    startpunkt = node.GetName().Substring(1, node.GetName().Length - 1);
+                }
+                else if (!node.GetName().Contains("-") && possibleNodes.Where(n => n.GetName().Equals("-" + node.GetName())).Count() == 1)
+                {
+                    startpunkt = "-" + node.GetName();
+                }
+                Debug.Log("1.: " + node.GetName().Substring(1, node.GetName().Length - 1));
+                Debug.Log("2.: " + "-" + node.GetName());
+            }
+            result.Add(startpunkt);
             bool addNodes = true;
             while (addNodes)
             { 
