@@ -209,8 +209,7 @@ public class drive : MonoBehaviour {
             {
                 if(state[count * lines].ToString().ToLower().Equals("g")) trafficLights[count].GetComponent<Renderer>().material.color = green;
                 if(state[count * lines].ToString().ToLower().Equals("y")) trafficLights[count].GetComponent<Renderer>().material.color = yellow;
-                if(state[count * lines].ToString().ToLower().Equals("r")) trafficLights[count].GetComponent<Renderer>().material.color = red;
-
+                if(state[count * lines].ToString().ToLower().Equals("r")) trafficLights[count].GetComponent<Renderer>().material.color = red;                
 
                 Debug.Log("Lines: " + lines);
                 Debug.Log("Count: " + count);
