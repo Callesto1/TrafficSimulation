@@ -47,6 +47,9 @@ public class drive : MonoBehaviour {
         trafficLights = GameObject.FindGameObjectsWithTag("TrafficLight");
     }
 
+    /**
+     * Anlegen einiger Objecte, die von Anfang an auf der Karte sind
+     */ 
     public void addStartingVehicles()
     {
         client.Route.Add("Route" + routeid, XmlMapReader.GetRandomRoute(XmlMapReader.AllNodes));
@@ -63,10 +66,12 @@ public class drive : MonoBehaviour {
         client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
         carid++;
 
+        //Hier wird das Fahrzeug in SUMO erzeugt, das vom User gefahren wird.
         client.Vehicle.Add("userCar", "DEFAULT_VEHTYPE", "", 0, 0, 0, Byte.Parse("0"));
         client.Vehicle.SetLength("userCar", 3.0);
         client.Vehicle.SetWidth("userCar", 1.5);
 
+        //Hier wird ein Fußgänger angelegt
         client.Person.Add("ped0", "DEFAULT_PEDTYPE", "gneE12", 0.0, 0.0);
         client.Person.AppendWalkingStage("ped0", new List<string>(new String[] { "gneE12", ":gneJ11_w1", ":gneJ11_c1", ":gneJ11_w2", ":gneJ11_c2", ":gneJ11_w0", "gneE14" }), 0.0, -1, 5, "");     
         
@@ -77,11 +82,13 @@ public class drive : MonoBehaviour {
         String carID = "veh" + id;
         if (client.Vehicle.GetAccel(carID).Result == ResultCode.Success)
         {
+            //Wenn das Fahrzeug in SUMO bekannt ist, dann werden dort die Position und Rotation ausgelesen und in Unity übertragen
             carObject.GetComponent<Transform>().eulerAngles = new Vector3(carObject.GetComponent<Transform>().eulerAngles.x, float.Parse(client.Vehicle.GetAngle(carID).Content.ToString()), carObject.GetComponent<Transform>().eulerAngles.z);
             carObject.GetComponent<Transform>().position = new Vector3((float)(client.Vehicle.GetPosition(carID).Content.X), carObject.GetComponent<Transform>().position.y < 0 ? 0.07F : carObject.GetComponent<Transform>().position.y, (float)(client.Vehicle.GetPosition(carID).Content.Y));
         }
         else
         {
+            //Ist das Fahrzeug nicht in SUMO bekannt, dann wird ein neues mit zufälliger Route angelegt
             client.Vehicle.Add(carID, "DEFAULT_VEHTYPE", GetRandomRoute(), 0, 0, 0, Byte.Parse("0"));
         }
     }
@@ -101,6 +108,7 @@ public class drive : MonoBehaviour {
         //}
         if (Input.GetKeyDown(KeyCode.K))
         {
+            //Wechseln der Kamerasicht zwischen User-Car und Sicht von oben
             if(mainCamera.enabled == true)
             {
                 mainCamera.enabled = false;
@@ -127,11 +135,13 @@ public class drive : MonoBehaviour {
 
         try
         {          
+            //Dieser Aufruf holt den nächsten Simulationsschritt aus SUMO
             client.Control.SimStep(time);
             step++;
 
             if(step==5)
             {
+                //Nach fünf Frames wird ein viertes AUto angelegt
                 client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
                 carid++;
             }
@@ -158,6 +168,10 @@ public class drive : MonoBehaviour {
         return "Route" + (routeid - 1);
     }
 
+    /**
+     * Diese Methode schickt die aktuellen Daten des User-Cars an Sumo. Außer den implementierten gibt es noch diverse weitere Parameter, die gesetzt werden
+     * können. Hier werden nur die wichtigsten gesetzt.
+     */ 
     private void sendPosition()
     {
         if (client.Vehicle.GetSpeed("userCar").Result == ResultCode.Success)
