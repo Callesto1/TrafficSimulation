@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
 
 public class drive : MonoBehaviour {
-    //Server starten!
+    //Zunächst Server starten!
     //sumo --remote-port 4001 --net map.net.xml
     //https://github.com/argos-research/sumo
     public GameObject playerCar;
@@ -20,7 +20,6 @@ public class drive : MonoBehaviour {
     public Camera mainCamera;
     public Camera playerCamera;
 
-    //private GameObject[] cars;
     private CarController carController;
     private TraCIClient client = new TraCIClient();
     private int carid;
@@ -38,7 +37,6 @@ public class drive : MonoBehaviour {
         carid = 0;
         routeid = 0;
         step = 0;
-        //lines = new List<string>();
         client.Connect("localhost", 4001);
         addStartingVehicles();
         carController = car0.GetComponent<CarController>();
@@ -141,7 +139,7 @@ public class drive : MonoBehaviour {
 
             if(step==5)
             {
-                //Nach fünf Frames wird ein viertes AUto angelegt
+                //Nach fünf Frames wird ein viertes Auto angelegt
                 client.Vehicle.Add("veh" + carid, "DEFAULT_VEHTYPE", "Route2", 0, 0, 0, Byte.Parse("0"));
                 carid++;
             }
@@ -189,15 +187,15 @@ public class drive : MonoBehaviour {
     }
 
     /**     
-     * Aktuell nur die Kreuzung "gneJ11" -> T Kreuzung mit Zebrastreifen.
-     * state="gGGgrrrrG"/>
+     * Die Methode setTrafficLights ruft die Ampelphase in Unity ab und setzt die Farben der Ampeln in die entsprechende Farbe.
+     * Aktuell wird nur die Kreuzung "gneJ11" genutzt (T Kreuzung mit Zebrastreifen).
+     * 
+     * Ausgelesen wird state="gGGgrrrrG"/>
      * Jeder Buchstabe entspricht einer Line auf der Kreuzung. 
      * r = rot
      * y = gelb
-     * g = grün aber keine Vorfahrt (vermutlich)
-     * G = grün und Vorfahrt (vermutlich)
-     * Laut Doku fangen die Indices oben an, passt allerdings hier irgendwie nicht.
-     * Bei uns fängt es rechts an und zählt im Uhrzeigersinn durch (bis jetzt).
+     * g = grün aber keine Vorfahrt
+     * G = grün und Vorfahrt
      */
     private void setTrafficLights()
     {
@@ -213,6 +211,13 @@ public class drive : MonoBehaviour {
 
         String lane = "";        
 
+        /**
+         * Hier werden die Lanes und ihre zugehörigen Lines aufgerufen. Da bei der T-Kreuzung keine Einschränkungen, was Fahrtrichtung
+         * betrifft existiert, so besitzt jede Lane zwei Lines, denen die Autos folgen können. Die zwei Lines haben logischerweise auch immer 
+         * die gleiche Farbe, weshalb nur einer der beiden ausgelesen wird.
+         * 
+         * Wenn ein 'w' im Index vorhanden ist, so handelt es sich um einen Fußgängerüberweg. Diese Ampeln wurden zunächst vernachlässigt.
+         */
         for (int i = 0; i <(int)(state.Length); i++)
         {
             if (lane.Equals(controlledLanes[i]) && controlledLanes[i].IndexOf("w") == -1)
@@ -233,10 +238,8 @@ public class drive : MonoBehaviour {
                 lines = 1;
             }
 
-            lane = controlledLanes[i]; //zum auslesen wie viele unterschiedliche lanes es gibt, da Lanes mehrere Lines haben können, was ja aber für die Ampelfarbe egal ist
-        }
-        
-        //if(state == "0") trafficLight.GetComponent<Renderer>().material.color = new Color(0, 1, 0);       
+            lane = controlledLanes[i]; //Zum auslesen wie viele unterschiedliche lanes es gibt, da Lanes mehrere Lines haben können.
+        }     
     }
 
 }
